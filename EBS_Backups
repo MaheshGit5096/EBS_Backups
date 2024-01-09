@@ -1,0 +1,18 @@
+import boto3
+import datetime
+
+def lambda_handler(event, context):
+    # Initialize the EC2 client
+    ec2 = boto3.client('ec2')
+
+    # Get a list of all EBS volumes in the region
+    volumes = ec2.describe_volumes()['Volumes']
+
+    # Create a snapshot for each volume
+    for volume in volumes:
+        volume_id = volume['VolumeId']
+        snapshot_description = f"Backup_{volume_id}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+        ec2.create_snapshot(VolumeId=volume_id, Description=snapshot_description)
+
+    print("EBS backups completed successfully.")
+
